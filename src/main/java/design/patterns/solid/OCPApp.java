@@ -1,5 +1,6 @@
 package design.patterns.solid;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OCPApp {
@@ -8,7 +9,10 @@ public class OCPApp {
         OCP.Product apple = new OCP.Product("Apple", OCP.Color.GREEN, OCP.Size.SMALL);
         OCP.Product tree = new OCP.Product("Tree", OCP.Color.GREEN, OCP.Size.LARGE);
         OCP.Product house = new OCP.Product("House", OCP.Color.BLUE, OCP.Size.HUGE);
-        List<OCP.Product> products = List.of(apple, tree, house);
+        List<OCP.Product> products = new ArrayList<>();
+        products.add(apple);
+        products.add(tree);
+        products.add(house);
         System.out.println("Specification pattern: ");
         System.out.println(products);
 
