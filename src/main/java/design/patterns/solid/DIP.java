@@ -2,9 +2,15 @@ package design.patterns.solid;
 
 import org.javatuples.Triplet;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public class DIP {
     enum Relationship {
@@ -75,4 +81,52 @@ public class DIP {
 
     }
 
-}
+    static class DateBucket {
+        // Simplified for the example, should have getters at least for these fields
+        final Instant from;
+        final Instant to;
+
+        DateBucket(Instant from, Instant to) {
+            this.from = from;
+            this.to = to;
+        }
+
+
+        public static List<DateBucket> bucketize(ZonedDateTime fromDate,
+
+                                             ZonedDateTime toDate,
+                                             int bucketSize,
+                                             ChronoUnit bucketSizeUnit) {
+        List<DateBucket> buckets = new ArrayList<>();
+        boolean reachedDate = false;
+        for (int i = 0; !reachedDate; i++) {
+            ZonedDateTime minDate = fromDate.plus(i * bucketSize, bucketSizeUnit);
+            ZonedDateTime maxDate = fromDate.plus((i + 1) * bucketSize, bucketSizeUnit);
+            reachedDate = toDate.isBefore(maxDate);
+            buckets.add(new DateBucket(minDate.toInstant(), maxDate.toInstant()));
+        }
+
+        return buckets;
+    }
+
+    public static List<DateBucket> bucketize2(ZonedDateTime fromDate,
+                                             ZonedDateTime toDate,
+                                             int bucketSize,
+                                             ChronoUnit bucketSizeUnit) {
+        return LongStream.rangeClosed(0, bucketSizeUnit.between(fromDate, toDate))
+                .mapToObj(inc -> {
+                    ZonedDateTime minDate = fromDate.plus(inc * bucketSize, bucketSizeUnit);
+                    ZonedDateTime maxDate = fromDate.plus((inc + 1) * bucketSize, bucketSizeUnit);
+                    return new DateBucket(minDate.toInstant(), maxDate.toInstant());
+                })
+                .filter(bucket -> {
+                    ZonedDateTime maxDate = bucket.to.atZone(toDate.getZone());
+                    ZonedDateTime limitDate = toDate.plus(bucketSize, bucketSizeUnit);
+                    return maxDate.isBefore(limitDate) || maxDate.isEqual(limitDate);
+                })
+                .collect(Collectors.toList());
+
+
+
+    }
+    }}
